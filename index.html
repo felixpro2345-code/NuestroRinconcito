@@ -1,0 +1,144 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#1a1030">
+  <title>Para ti</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;1,9..144,400;1,9..144,600&family=Figtree:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div id="entrada" class="entrada" role="dialog" aria-modal="true" aria-label="Bienvenida" hidden>
+    <div class="entrada-luna" aria-hidden="true"></div>
+    <div class="entrada-corazones" id="entradaCorazones" aria-hidden="true"></div>
+    <div class="entrada-in">
+      <div class="entrada-tortuga" aria-hidden="true"><span class="orbita o1"></span><span class="orbita o2"></span><span class="orbita o3"></span><b>🐢</b></div>
+      <h2 id="entradaTitulo" class="entrada-titulo"></h2>
+      <p class="entrada-sub">Hice este rincón solo para ti.<br>Ponte cómoda, sube un poquito el volumen y entra.</p>
+      <p class="entrada-dias" id="entradaDias"></p>
+      <button type="button" class="entrada-btn" id="entradaBtn"><span>Entrar</span><i aria-hidden="true">♥</i></button>
+      <p class="entrada-nota">🎵 Con música de fondo</p>
+    </div>
+  </div>
+  <button type="button" id="musicaBtn" class="musica-btn" aria-label="Silenciar la música" hidden>
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path class="mn" d="M9 18V6l10-2v12"/><circle cx="6.5" cy="18" r="2.5"/><circle cx="16.5" cy="16" r="2.5"/><path class="raya" d="M3 3l18 18"/></svg>
+  </button>
+  <div id="cielo" aria-hidden="true"></div>
+  <canvas id="fx" aria-hidden="true"></canvas>
+
+  <header class="hero">
+    <h1 id="saludo" aria-label="Hola"></h1>
+    <p id="bienvenida" class="mensaje"></p>
+    <div class="juntos" id="contador" aria-live="off"></div>
+  </header>
+
+  <main id="escenario">
+    <section id="cartas" class="panel on" aria-labelledby="h-cartas">
+      <div class="panel-h"><h2 id="h-cartas">Cartitas para cuando tu cabecita no esté tranquila</h2><p id="cartasSub"></p></div>
+      <div class="barra"><button id="cartaAzar" class="btn" type="button">Abrir una al azar</button></div>
+      <div id="listaCartas" class="cartas"></div>
+    </section>
+
+    <section id="puzzle" class="panel" aria-labelledby="h-puzzle">
+      <div class="panel-h"><h2 id="h-puzzle">Rompecabezas</h2><p>Toca una pieza y luego una vecina (izquierda, derecha, arriba o abajo) para intercambiarlas.</p></div>
+      <div class="tira">
+        <button class="tira-flecha izq" id="tiraIzq" type="button" aria-label="Ver fotos anteriores" disabled>
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 5-7 7 7 7"/></svg></button>
+        <div id="puzzleFotos" class="miniaturas" role="group" aria-label="Elegir foto"></div>
+        <button class="tira-flecha der" id="tiraDer" type="button" aria-label="Ver más fotos">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 5 7 7-7 7"/></svg></button>
+      </div>
+      <p class="tira-info" id="puzzleFotoInfo"></p>
+      <div class="barra">
+        <div class="seg" role="group" aria-label="Dificultad">
+          <button type="button" data-n="3" class="on">Fácil 3×3</button>
+          <button type="button" data-n="4">Medio 4×4</button>
+          <button type="button" data-n="5">Difícil 5×5</button>
+        </div>
+        <button id="puzzleNuevo" class="btn" type="button">Mezclar</button>
+        <button id="puzzleAzar" class="btn ghost" type="button">Foto al azar</button>
+        <button id="puzzleVer" class="btn ghost" type="button">Mantén para ver la foto</button>
+      </div>
+      <div class="marco" id="puzzleMarco">
+        <div id="puzzleTablero" class="tablero"></div>
+        <div id="puzzleGuia" class="guia"></div>
+      </div>
+      <p class="contador-mov"><span id="puzzleMov">0 movimientos</span></p>
+      <p id="puzzleMsg" class="msg" role="status"></p>
+    </section>
+
+    <section id="memoria" class="panel" aria-labelledby="h-memoria">
+      <div class="panel-h"><h2 id="h-memoria">Memoria</h2><p>Voltea dos cartas y encuentra la pareja de cada foto.</p></div>
+      <div class="barra"><button id="memNuevo" class="btn" type="button">Jugar de nuevo</button><span id="memInfo" class="dato"></span></div>
+      <div id="memTablero" class="memgrid"></div>
+      <div id="memPremio" class="premio-caja" role="status"></div>
+    </section>
+
+    <section id="acertijos" class="panel" aria-labelledby="h-acertijos">
+      <div class="panel-h"><h2 id="h-acertijos">Acertijos</h2><p>Elige un tema. Cada acertijo tiene dos pistas, y tu avance se guarda.</p></div>
+      <div id="acertijoBox"></div>
+    </section>
+
+    <section id="audios" class="panel" aria-labelledby="h-audios">
+      <div class="panel-h"><h2 id="h-audios">Mensajes de voz</h2><p>Con mi voz, para cuando quieras escucharme. Mejor con audífonos.</p></div>
+      <div id="vozResumen" class="voz-resumen"></div>
+      <div id="listaAudios" class="voces"></div>
+    </section>
+
+    <section id="videos" class="panel" aria-labelledby="h-videos">
+      <div class="panel-h"><h2 id="h-videos">Videos</h2><p>Desliza hacia arriba, como en TikTok. Hechos para ti.</p></div>
+      <div id="listaVideos"></div>
+    </section>
+
+    <section id="razones" class="panel" aria-labelledby="h-razones">
+      <div class="panel-h"><h2 id="h-razones">Razones</h2><p>Cada estrella guarda una razón por la que te quiero. Descúbrelas todas.</p></div>
+      <div class="cielo-razon" id="cieloRazon">
+        <div class="rz-estrella" id="rzEstrella" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="m12 2.5 2.9 6.2 6.8.8-5 4.7 1.3 6.700L12 17.6 6 20.9l1.3-6.700-5-4.7 6.800-.8z"/></svg></div>
+        <p class="rz-num" id="rzNum"></p>
+        <p id="razonTexto" class="razon" role="status">Toca el botón y descubre una razón.</p>
+      </div>
+      <div class="centro rz-botones">
+        <button id="razonPrev" class="btn ghost" type="button" disabled>Anterior</button>
+        <button id="razonBtn" class="btn" type="button">Pedir una razón</button>
+      </div>
+      <div class="rz-const-caja">
+        <p class="rz-cuenta" id="rzCuenta"></p>
+        <div class="rz-const" id="rzConst" role="group" aria-label="Razones descubiertas"></div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="pie">Hecho con cariño por <span id="firma"></span></footer>
+
+  <nav class="dock" id="dock" aria-label="Secciones">
+    <button type="button" data-t="cartas" class="on" aria-label="Cartas">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3.5 7 8.5 6 8.5-6"/></svg><span>Cartas</span>
+    </button>
+    <button type="button" data-t="puzzle" aria-label="Rompecabezas">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="8" height="8" rx="2"/><rect x="13" y="3" width="8" height="8" rx="2"/><rect x="3" y="13" width="8" height="8" rx="2"/><rect x="13" y="13" width="8" height="8" rx="2"/></svg><span>Puzzle</span>
+    </button>
+    <button type="button" data-t="memoria" aria-label="Memoria">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="6" width="12" height="15" rx="2"/><path d="M9 3h10a2 2 0 0 1 2 2v12"/></svg><span>Memoria</span>
+    </button>
+    <button type="button" data-t="acertijos" aria-label="Acertijos">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"/></svg><span>Acertijos</span>
+    </button>
+    <button type="button" data-t="audios" aria-label="Audios">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="2.5"/></svg><span>Audios</span>
+    </button>
+    <button type="button" data-t="videos" aria-label="Videos">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="3"/><path d="m10 9 5 3-5 3z"/></svg><span>Videos</span>
+    </button>
+    <button type="button" data-t="razones" aria-label="Razones">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20s-7.5-4.6-7.5-10.2A4.1 4.1 0 0 1 12 7.6a4.1 4.1 0 0 1 7.5 2.2C19.5 15.4 12 20 12 20z"/></svg><span>Razones</span>
+    </button>
+  </nav>
+
+  <script src="config.js"></script>
+  <script src="acertijos.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
