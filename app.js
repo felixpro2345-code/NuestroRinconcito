@@ -279,12 +279,31 @@ $("#cartaAzar").onclick = () => abrirCarta(cartasEl[Math.floor(Math.random() * c
    ========================================================= */
 let pz = { n: 3, orden: [], img: "", mov: 0, foto: 0, ganado: false, ar: 1, sel: null, token: 0 };
 
+// ---- fotos bloqueadas: se desbloquean al completar rompecabezas
+const CLAVE_DESB = "puzzle_desbloqueadas_v1";
+let desb = new Set();
+try { desb = new Set(JSON.parse(localStorage.getItem(CLAVE_DESB) || "[]")); } catch (e) { desb = new Set(); }
+const guardarDesb = () => { try { localStorage.setItem(CLAVE_DESB, JSON.stringify([...desb])); } catch (e) {} };
+const PZ_TODAS = !!(C.puzzle && C.puzzle.todasDesbloqueadas);
+const PZ_INICIO = Math.max(1, (C.puzzle && C.puzzle.fotosIniciales) || 3);
+desb = new Set([...desb].filter((i) => i >= 0 && i < C.fotos.length));
+if (PZ_TODAS) C.fotos.forEach((_, i) => desb.add(i));
+while (desb.size < Math.min(PZ_INICIO, C.fotos.length)) desb.add(Math.floor(Math.random() * C.fotos.length));
+guardarDesb();
+const libre = (i) => desb.has(i);
+
+function textoFoto() {
+  $("#puzzleFotoInfo").innerHTML = `Foto ${pz.foto + 1} de ${C.fotos.length}`;
+  const t = C.fotos.length, n = desb.size;
+  $("#puzzleDesb").innerHTML = `<span>🔓 ${n} de ${t} fotos desbloqueadas</span><div class="barra-ac"><i style="width:${(n / t) * 100}%"></i></div>`;
+}
 function elegirFoto(i) {
+  if (!libre(i)) return;
   pz.foto = i;
   $$("#puzzleFotos button").forEach((x, k) => x.classList.toggle("on", k === i));
   const b = $$("#puzzleFotos button")[i], tira = $("#puzzleFotos");
   if (b) tira.scrollTo({ left: b.offsetLeft - tira.clientWidth / 2 + b.offsetWidth / 2, behavior: reduce ? "auto" : "smooth" });
-  $("#puzzleFotoInfo").textContent = `Foto ${i + 1} de ${C.fotos.length}`;
+  textoFoto();
   puzzleNuevo();
 }
 // flechas de la tira de fotos: se apagan cuando ya no hay más hacia ese lado
@@ -307,19 +326,67 @@ const verMiniatura = new IntersectionObserver((es) => es.forEach((e) => {
   verMiniatura.unobserve(e.target);
   foto(+e.target.dataset.i).then((src) => (e.target.style.backgroundImage = `url("${src}")`));
 }), { root: $("#puzzleFotos"), rootMargin: "0px 120px" });
+const desbEl = document.createElement("div");
+desbEl.id = "puzzleDesb"; desbEl.className = "pz-desb";
+$("#puzzleFotoInfo").after(desbEl);
+const pistaBloq = (i) => {
+  const m = $("#puzzleFotoInfo");
+  m.textContent = "Esa foto sigue oculta. Completa rompecabezas para descubrirla 🐢";
+  setTimeout(() => textoFoto(), 2600);
+};
+function pintarMini(b, i) {
+  const ok = libre(i);
+  b.classList.toggle("bloq", !ok);
+  b.setAttribute("aria-label", ok ? `Foto ${i + 1}` : `Foto ${i + 1}, bloqueada`);
+  b.innerHTML = ok ? "" : '<span class="q">?</span><span class="tg">🐢</span>';
+  if (ok) { b.style.backgroundImage = ""; verMiniatura.observe(b); }
+}
+pz.foto = [...desb].sort((x, y) => x - y)[0];
 C.fotos.forEach((_, i) => {
   const b = document.createElement("button");
-  b.type = "button"; b.dataset.i = i; b.setAttribute("aria-label", `Foto ${i + 1}`);
-  if (i === 0) b.classList.add("on");
-  b.onclick = () => elegirFoto(i);
+  b.type = "button"; b.dataset.i = i;
+  b.style.setProperty("--r", (i % 5) - 2);
+  if (i === pz.foto) b.classList.add("on");
+  b.onclick = () => { if (libre(i)) elegirFoto(i); else { b.classList.remove("no"); void b.offsetWidth; b.classList.add("no"); pistaBloq(i); } };
   $("#puzzleFotos").appendChild(b);
-  verMiniatura.observe(b);
+  pintarMini(b, i);
 });
+textoFoto();
 $("#puzzleAzar").onclick = () => {
-  if (C.fotos.length < 2) return;
-  let i; do { i = Math.floor(Math.random() * C.fotos.length); } while (i === pz.foto);
-  elegirFoto(i);
+  const pool = [...desb].filter((k) => k !== pz.foto);
+  if (!pool.length) return;
+  elegirFoto(pool[Math.floor(Math.random() * pool.length)]);
 };
+// al ganar: se desbloquea una foto nueva
+async function desbloquearNueva() {
+  const faltan = C.fotos.map((_, i) => i).filter((i) => !libre(i));
+  if (!faltan.length) return null;
+  const i = faltan[Math.floor(Math.random() * faltan.length)];
+  desb.add(i); guardarDesb();
+  const b = $$("#puzzleFotos button")[i];
+  pintarMini(b, i);
+  b.classList.add("recien");
+  setTimeout(() => b.classList.remove("recien"), 6000);
+  textoFoto();
+  return i;
+}
+async function mostrarDesbloqueo(i) {
+  const src = await foto(i);
+  const ov = document.createElement("div");
+  ov.className = "pz-revela"; ov.setAttribute("role", "dialog"); ov.setAttribute("aria-label", "Foto desbloqueada");
+  const todas = desb.size >= C.fotos.length;
+  ov.innerHTML = `<div class="pz-rev-in">
+    <p class="pz-rev-t">${todas ? "¡Desbloqueaste todas las fotos! 🎉" : "¡Desbloqueaste una foto nueva!"}</p>
+    <div class="pz-rev-foto"><img alt="" src="${src}"><span class="q">?</span><span class="tg">🐢</span></div>
+    <div class="pz-rev-b"><button type="button" class="btn" data-a="ya">Armarla ahora</button><button type="button" class="btn ghost" data-a="luego">Seguir</button></div></div>`;
+  document.body.appendChild(ov);
+  requestAnimationFrame(() => ov.classList.add("ver"));
+  setTimeout(() => ov.classList.add("abre"), 700);
+  const cerrar = (armar) => { ov.classList.remove("ver"); setTimeout(() => ov.remove(), 400); if (armar) elegirFoto(i); };
+  $('[data-a="ya"]', ov).onclick = () => cerrar(true);
+  $('[data-a="luego"]', ov).onclick = () => cerrar(false);
+  $('[data-a="ya"]', ov).focus();
+}
 $$(".seg button").forEach((b) => b.onclick = () => {
   $$(".seg button").forEach((x) => x.classList.toggle("on", x === b));
   pz.n = +b.dataset.n; puzzleNuevo();
@@ -430,6 +497,7 @@ function intercambiar(a, b) {
     $("#puzzleMarco").classList.add("ganado");
     $("#puzzleMsg").textContent = `Lo armaste en ${pz.mov} movimientos.`;
     celebrar();
+    desbloquearNueva().then((i) => { if (i !== null) { $("#puzzleMsg").textContent += " 🔓 ¡Hay una foto nueva desbloqueada!"; setTimeout(() => mostrarDesbloqueo(i), 1100); } });
   }
 }
 $("#puzzleNuevo").onclick = puzzleNuevo;
