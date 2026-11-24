@@ -48,6 +48,10 @@ window.CONFIG = {
     { titulo: "Un secreto de tortugas", archivo: "media/audios/mensaje9.ogg" },
     { titulo: "Buenas noches, mi niña", nota: "Para dormir tranquila", archivo: "media/audios/mensaje10.ogg" }
   ],
+  puzzle: {
+  fotosIniciales: 3,          // fotos libres al empezar
+  todasDesbloqueadas: false   // true = mostrarlas todas desde el inicio
+},
 
    videos: [
     { titulo: "Video 1", nota: "", archivo: "media/videos/video1.mp4" },
