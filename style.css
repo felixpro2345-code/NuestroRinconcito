@@ -474,3 +474,29 @@ body.con-entrada{overflow:hidden}
 .mp-nota{margin:12px 2px 0;font-size:.76rem;color:var(--suave);line-height:1.4}
 .mp-item:focus-visible,.mp-ctrl button:focus-visible,.mp-x:focus-visible{outline:2px solid var(--ambar);outline-offset:2px}
 @media(prefers-reduced-motion:reduce){.musica-btn.suena svg .mn,.musica-btn.suena ~ .musica-panel .mp-item.act .mp-eq i{animation:none}}
+
+/* ---------- puzzle: fotos ocultas ---------- */
+.pz-desb{max-width:300px;margin:-6px auto 14px;text-align:center;font-size:.85rem;color:var(--ambar)}
+.pz-desb .barra-ac{margin-top:6px}
+.miniaturas button{position:relative;overflow:hidden}
+.miniaturas button.bloq{opacity:1;background:radial-gradient(circle at 50% 30%,rgba(185,164,255,.35),transparent 65%),linear-gradient(160deg,#3a2257,#1d1234);border-color:rgba(185,164,255,.28);cursor:pointer}
+.miniaturas button .q{position:absolute;inset:0;display:grid;place-items:start center;padding-top:3px;font:700 1.9rem/1 var(--serif);color:var(--ambar);text-shadow:0 0 12px rgba(255,210,122,.75);animation:rzTitila 3.2s ease-in-out infinite;animation-delay:calc(var(--r)*.4s)}
+.miniaturas button .tg{position:absolute;left:0;right:0;bottom:3px;text-align:center;font-size:1.25rem;line-height:1;filter:saturate(.7) brightness(.85);transform:scaleX(var(--flip,1))}
+.miniaturas button.bloq:hover{border-color:var(--lila)}
+.miniaturas button.no{animation:tiembla .4s}
+.miniaturas button.recien{animation:recien 1.2s ease-in-out 5;border-color:var(--rosa)}
+@keyframes recien{50%{box-shadow:0 0 0 4px rgba(255,143,171,.5),0 0 22px rgba(255,143,171,.8)}}
+.pz-revela{position:fixed;inset:0;z-index:150;display:grid;place-items:center;padding:20px;background:rgba(20,11,38,.82);opacity:0;transition:opacity .4s}
+.pz-revela.ver{opacity:1}
+.pz-rev-in{width:min(340px,100%);text-align:center;padding:22px 20px;border-radius:28px;border:1px solid var(--borde);background:linear-gradient(180deg,#3a2257,#1d1234);box-shadow:0 0 70px -10px rgba(255,143,171,.6);transform:scale(.9);transition:transform .5s cubic-bezier(.3,1.4,.5,1)}
+.pz-revela.ver .pz-rev-in{transform:none}
+.pz-rev-t{margin:0 0 14px;font-family:var(--serif);font-weight:600;font-size:1.3rem;color:var(--luna)}
+.pz-rev-foto{position:relative;width:100%;aspect-ratio:1;border-radius:20px;overflow:hidden;background:linear-gradient(160deg,#3a2257,#1d1234)}
+.pz-rev-foto img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;filter:blur(18px) brightness(.6);transform:scale(1.15);transition:opacity 1s,filter 1.2s,transform 1.2s}
+.pz-revela.abre .pz-rev-foto img{opacity:1;filter:none;transform:none}
+.pz-rev-foto .q{position:absolute;inset:0;display:grid;place-items:center;padding-bottom:30px;font:700 6rem/1 var(--serif);color:var(--ambar);text-shadow:0 0 26px rgba(255,210,122,.8);transition:opacity .6s,transform .6s}
+.pz-rev-foto .tg{position:absolute;left:0;right:0;bottom:16px;text-align:center;font-size:3rem;line-height:1;transform:scaleX(var(--flip,1));transition:opacity .6s}
+.pz-revela.abre .pz-rev-foto .q{opacity:0;transform:scale(1.6)}
+.pz-revela.abre .pz-rev-foto .tg{opacity:0}
+.pz-rev-b{display:flex;gap:10px;justify-content:center;margin-top:16px;flex-wrap:wrap}
+@media(prefers-reduced-motion:reduce){.miniaturas button .q,.miniaturas button.recien{animation:none}.pz-rev-foto img{transition:none}}
